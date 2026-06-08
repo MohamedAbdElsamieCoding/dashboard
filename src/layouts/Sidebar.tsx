@@ -16,12 +16,12 @@ const Sidebar = () => {
   ];
 
   return (
-    <aside className="w-64 border-r-border pt-6 px-6">
+    <aside className="flex h-screen flex-col w-64 border-r border-border pt-6 px-6 bg-surface">
       <div className="mb-10 flex flex-col gap-2">
-        <h2 className="text-2xl font-bold font-sans tracking-tight text-primary">
+        <h2 className="text-2xl font-bold tracking-tight text-primary">
           Vertex
         </h2>
-        <p className="font-sans font-semibold text-xs tracking-widest text-text-muted">
+        <p className="font-semibold text-xs tracking-widest text-text-muted">
           Admin Console
         </p>
       </div>
@@ -43,13 +43,27 @@ const Sidebar = () => {
               to={item.link}
             >
               <Icon size={18} />
-              <p className="font-sans text-sm font-medium tracking-[0.24px]">
+              <p className="text-sm font-medium tracking-[0.24px]">
                 {item.title}
               </p>
             </NavLink>
           );
         })}
       </nav>
+      <div className="-mx-6 mt-auto">
+        <div className="w-full h-0.5 bg-border" />
+        <div className="py-6 px-6 flex gap-4 items-center">
+          <div className="rounded-full h-10 w-10 bg-primary flex items-center justify-center">
+            <p className="text-base font-bold text-[#0D0096]">JD</p>
+          </div>
+          <div className="flex flex-col gap-1">
+            <h3 className="text-xs font-bold tracking-wider">John Doe</h3>
+            <p className="uppercase font-normal text-[10px] tracking-wide">
+              SUPER ADMIN
+            </p>
+          </div>
+        </div>
+      </div>
     </aside>
   );
 };
