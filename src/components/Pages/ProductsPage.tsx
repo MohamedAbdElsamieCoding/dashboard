@@ -1,0 +1,9 @@
+const ProductsPage = () => {
+  return (
+    <div>
+      <h2 className="text-2xl font-bold">Products</h2>
+    </div>
+  );
+};
+
+export default ProductsPage;

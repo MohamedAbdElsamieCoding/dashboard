@@ -1,1 +1,49 @@
 @import "tailwindcss";
+
+@theme {
+  /* Fonts */
+  --font-sans: "Geist", sans-serif;
+  --font-mono: "Geist Mono", monospace;
+
+  /* Background */
+  --color-bg: #13131b;
+  --color-surface: #1f1f27;
+
+  /* Brand */
+  --color-primary: #c0c1ff;
+  --color-secondary: #4edea3;
+  --color-tertiary: #ffb783;
+
+  /* States */
+  --color-success: #4edea3;
+  --color-warning: #ffb783;
+  --color-error: #ffb4ab;
+  --color-info: #7dd3fc;
+
+  /* Text */
+  --color-text: #e4e1ed;
+  --color-text-muted: #c7c4d7;
+
+  /* Borders */
+  --color-border: #464554;
+}
+
+/* avoid resetting padding globally so utility classes like p-6 work */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+@layer base {
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+  }
+}
