@@ -16,7 +16,7 @@ const Sidebar = () => {
   ];
 
   return (
-    <aside className="flex h-screen flex-col w-64 border-r border-border pt-6 px-6 bg-surface">
+    <aside className="fixed left-0 top-0 h-screen w-64 border-r border-border pt-6 px-6 bg-surface flex flex-col">
       <div className="mb-10 flex flex-col gap-2">
         <h2 className="text-2xl font-bold tracking-tight text-primary">
           Vertex
