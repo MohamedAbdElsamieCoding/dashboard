@@ -1,29 +1,44 @@
+import { clsx } from "clsx";
 import type { IconType } from "react-icons";
 import { PiTrendUpThin } from "react-icons/pi";
 
 type CardProps = {
   title: string;
   value: string;
-  percentage: string;
+  percentage?: string;
   icon: IconType;
+  iconClassName?: string;
 };
 
-const Card = ({ title, value, percentage, icon: Icon }: CardProps) => {
+const Card = ({
+  title,
+  value,
+  percentage,
+  iconClassName,
+  icon: Icon,
+}: CardProps) => {
   return (
     <div className="relative p-6 flex flex-col gap-1 bg-surface border border-border rounded-xl overflow-hidden">
       <div className="absolute -top-15 -right-15 bg-[#908FA0] rounded-full h-24 w-24 blur-3xl" />
-      <div className="flex items-start justify-between">
-        <div className="bg-primary/10 h-10 w-10 rounded-xl flex items-center justify-center text-primary">
-          <Icon className="text-xl" />
+      <div
+        className={clsx(
+          "flex items-center",
+          percentage ? "justify-between" : "justify-end",
+        )}
+      >
+        <div className="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-xl">
+          <Icon className={clsx("text-xl", iconClassName)} />
         </div>
 
-        <div className="flex items-center text-secondary">
-          <p className="text-base font-normal">{percentage}</p>
-          <PiTrendUpThin />
-        </div>
+        {percentage && (
+          <div className="text-secondary flex items-center gap-1">
+            <span className="text-sm font-medium">{percentage}</span>
+            <PiTrendUpThin className="text-lg" />
+          </div>
+        )}
       </div>
 
-      <p className="pt-3 text-text-muted tracking-wide font-medium text-xs">
+      <p className="pt-3 text-text-muted tracking-wide font-medium text-xs text">
         {title}
       </p>
 

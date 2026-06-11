@@ -7,11 +7,11 @@ import {
 const Navbar = () => {
   return (
     <header className="flex h-16 items-center justify-between border-b border-border px-6">
-      <div className="border border-border rounded-full flex items-center px-3 py-2 bg-neutral-950">
+      <div className="border border-border rounded-full flex items-center px-3 py-2 bg-neutral-950 w-1/2">
         <IoSearchOutline className="text-xl" />
         <input
           type="text"
-          className="px-2 focus:outline-0 text-text"
+          className="px-2 focus:outline-0 text-text w-full"
           placeholder="Search analytics data..."
         />
       </div>
