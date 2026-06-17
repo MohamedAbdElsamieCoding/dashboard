@@ -11,7 +11,7 @@ const Sidebar = () => {
   const navLinks = [
     { title: "Dashboard", link: "/", icon: RiDashboardHorizontalLine },
     { title: "Products", link: "/products", icon: RiBox3Line },
-    { title: "Users", link: "/users", icon: RiUser3Line },
+    { title: "Orders", link: "/orders", icon: RiUser3Line },
     { title: "Analytics", link: "/analytics", icon: RiBarChart2Line },
   ];
 
