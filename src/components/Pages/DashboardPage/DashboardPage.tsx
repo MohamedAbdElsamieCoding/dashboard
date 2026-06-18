@@ -15,30 +15,85 @@ import {
   IoDownloadOutline,
 } from "react-icons/io5";
 import ProductCard from "../../ui/ProductCard";
+import { useProducts } from "../../../hooks/useProducts";
+import { useUsers } from "../../../hooks/useUsers";
+import { useCarts } from "../../../hooks/useCarts";
+import { useMemo } from "react";
+import { RiErrorWarningLine } from "react-icons/ri";
 
 const DashboardPage = () => {
+  const {
+    data: productsData,
+    isLoading: productsLoading,
+    isError: productsError,
+    refetch,
+  } = useProducts();
+
+  const { data: usersData, isLoading: usersLoading } = useUsers();
+  const { data: cartsData, isLoading: cartsLoading } = useCarts();
+
+  const totalRevenue = useMemo(() => {
+    return cartsData?.carts?.reduce((sum, cart) => sum + cart.total, 0) ?? 0;
+  }, [cartsData]);
+
+  console.log(cartsData);
+
+  if (productsLoading || usersLoading || cartsLoading || !cartsData) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (productsError) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
+        <RiErrorWarningLine className="text-6xl text-red-500" />
+
+        <h2 className="text-2xl font-semibold">Failed to load dashboard</h2>
+
+        <p className="text-gray-500">
+          An unexpected error occurred while fetching data.
+        </p>
+
+        <button
+          onClick={() => refetch()}
+          className="px-5 py-2 rounded-lg bg-primary text-white"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  const totalProducts = productsData?.total ?? 0;
+  const totalCustomers = usersData?.total ?? 0;
+
+  const totalOrders = cartsData?.total ?? cartsData?.carts?.length ?? 0;
+
   const stats = [
     {
       title: "Total Revenue",
-      value: "$128,430",
+      value: `$${totalRevenue}`,
       percentage: "+12%",
       icon: PiMoneyWavyLight,
     },
     {
       title: "Total Orders",
-      value: "1,240",
+      value: totalOrders.toString(),
       percentage: "+5%",
       icon: PiShoppingBagLight,
     },
     {
       title: "Total Customers",
-      value: "892",
+      value: totalCustomers.toString(),
       percentage: "+8%",
       icon: PiUserThin,
     },
     {
       title: "Total Products",
-      value: "450",
+      value: totalProducts.toString(),
       percentage: "Active",
       icon: AiOutlineFileDone,
     },
@@ -57,12 +112,12 @@ const DashboardPage = () => {
           />
         ))}
       </div>
-      <div className="grid grid-cols-3 gap-6">
-        <div className="col-span-2">
-          <RevenueChart />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <RevenueChart cartsData={cartsData} />
         </div>
         <div className="col-span-1 ">
-          <DailySalesChart />
+          <DailySalesChart cartsData={cartsData} />
         </div>
       </div>
       <div className="grid grid-cols-4 gap-6">

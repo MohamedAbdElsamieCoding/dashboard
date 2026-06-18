@@ -1,14 +1,37 @@
+import { useMemo } from "react";
 import { getRevenueChartOptions } from "../../../services/charts/revenueChartOpt";
 import ReactECharts from "echarts-for-react";
+import type { CartsResponse } from "../../../types/carts.type";
 
-const RevenueChart = () => {
-  const revenueData = [
-    { month: "Jan", revenue: 12000 },
-    { month: "Feb", revenue: 18000 },
-    { month: "Mar", revenue: 15000 },
-    { month: "Apr", revenue: 25000 },
-    { month: "May", revenue: 22000 },
-  ];
+interface RevenueChartProps {
+  cartsData: CartsResponse;
+}
+
+const RevenueChart = ({ cartsData }: RevenueChartProps) => {
+  const revenueData = useMemo(() => {
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+
+    return (
+      cartsData?.carts.slice(0, 12).map((cart, index) => ({
+        month: months[index],
+        revenue: cart.discountedTotal,
+      })) ?? []
+    );
+  }, [cartsData]);
+
   return (
     <div className="p-6 flex flex-col gap-10 bg-bg/60 border border-border rounded-xl">
       <div className="flex justify-between items-center">
