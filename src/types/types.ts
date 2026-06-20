@@ -1,3 +1,5 @@
+export type OrderStatus = "Completed" | "Pending" | "Cancelled";
+
 export interface RevenueData {
   month: string;
   revenue: number;
@@ -12,7 +14,7 @@ export interface Order {
   id: string;
   customer: string;
   date: string;
-  status: "Pending" | "Completed" | "Cancelled";
+  status: OrderStatus;
   amount: number;
 }
 

@@ -33,7 +33,6 @@ const RecentOrders = ({ data }: Props) => {
               <td className="py-4 font-medium">{order.id}</td>
               <td>{order.customer}</td>
               <td className="text-text-muted">{order.date}</td>
-
               <td>
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-medium ${
@@ -43,8 +42,12 @@ const RecentOrders = ({ data }: Props) => {
                   {order.status}
                 </span>
               </td>
-
-              <td className="text-right font-medium">${order.amount}</td>
+              <td className="text-right font-medium">
+                {new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: "USD",
+                }).format(order.amount)}
+              </td>
             </tr>
           ))}
         </tbody>

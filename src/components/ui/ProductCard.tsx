@@ -1,20 +1,31 @@
 import { PiTrendUpThin } from "react-icons/pi";
+import type { Product } from "../../types/products.type";
 
-const ProductCard = () => {
+interface ProductCardProps {
+  product: Product;
+}
+
+const ProductCard = ({ product }: ProductCardProps) => {
   return (
     <div className="p-4 flex gap-6 bg-[#1B1B23] border border-border rounded-xl items-center">
-      <img src="/product.png" alt="product" className="rounded-lg h-16 w-16" />
+      <img
+        src={product.images[0]}
+        alt="product"
+        className="rounded-lg h-16 w-16"
+      />
       <div className="flex flex-col gap-2 w-full">
         <h3 className="text-text tracking-wide text-xs font-medium">
-          OmniBook Pro M3
+          {product.title}
         </h3>
         <p className="text-[10px] text-text-muted font-normal">
-          Electronics •<span> 842 sales</span>
+          {product.category} •<span> {product.reviews[1].rating} review</span>
         </p>
         <div className="flex justify-between items-center text-secondary">
-          <p className="text-base font-mono font-normal">$1,499</p>
+          <p className="text-base font-mono font-normal">${product.price}</p>
           <div className="flex items-center">
-            <p className="text-[10px] font-normal">14%</p>
+            <p className="text-[10px] font-normal">
+              {product.discountPercentage}%
+            </p>
             <PiTrendUpThin width={10} />
           </div>
         </div>
