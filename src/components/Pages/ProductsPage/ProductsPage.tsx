@@ -1,100 +1,111 @@
 import { clsx } from "clsx";
 import { IoAdd } from "react-icons/io5";
 import Card from "../../ui/Card";
-import { LuBanknote, LuClipboardCheck, LuTriangleAlert } from "react-icons/lu";
+import {
+  LuBanknote,
+  LuClipboardCheck,
+  LuTriangleAlert,
+  LuEllipsisVertical,
+} from "react-icons/lu";
+import { useMemo, useState } from "react";
+import AddProductForm from "./AddProductForm";
+import { useProducts } from "../../../hooks/useProducts";
 
 const ProductsPage = () => {
-  const products = [
-    {
-      id: 1,
-      product: "iPhone 15 Pro",
-      sku: "APL-IP15P-001",
-      category: "Smartphones",
-      price: "$1,099",
-      stock: 42,
-      status: "Active",
-    },
-    {
-      id: 2,
-      product: "Samsung Galaxy S25",
-      sku: "SMS-S25-002",
-      category: "Smartphones",
-      price: "$999",
-      stock: 18,
-      status: "Active",
-    },
-    {
-      id: 3,
-      product: "MacBook Air M4",
-      sku: "APL-MBA-M4",
-      category: "Laptops",
-      price: "$1,299",
-      stock: 12,
-      status: "Active",
-    },
-    {
-      id: 4,
-      product: "Dell XPS 15",
-      sku: "DLL-XPS15",
-      category: "Laptops",
-      price: "$1,499",
-      stock: 0,
-      status: "Out of Stock",
-    },
-    {
-      id: 5,
-      product: "Sony WH-1000XM6",
-      sku: "SNY-WHXM6",
-      category: "Audio",
-      price: "$399",
-      stock: 65,
-      status: "Active",
-    },
-    {
-      id: 6,
-      product: "Apple Watch Series 11",
-      sku: "APL-AWS11",
-      category: "Wearables",
-      price: "$499",
-      stock: 24,
-      status: "Active",
-    },
-    {
-      id: 7,
-      product: "iPad Pro M4",
-      sku: "APL-IPDM4",
-      category: "Tablets",
-      price: "$1,099",
-      stock: 9,
-      status: "Low Stock",
-    },
-    {
-      id: 8,
-      product: "Logitech MX Master 3S",
-      sku: "LOG-MXM3S",
-      category: "Accessories",
-      price: "$99",
-      stock: 88,
-      status: "Active",
-    },
-    {
-      id: 9,
-      product: "PlayStation 5 Slim",
-      sku: "SNY-PS5SL",
-      category: "Gaming",
-      price: "$499",
-      stock: 5,
-      status: "Low Stock",
-    },
-    {
-      id: 10,
-      product: 'Samsung 49" Odyssey G9',
-      sku: "SMS-G9-49",
-      category: "Monitors",
-      price: "$1,299",
-      stock: 3,
-      status: "Low Stock",
-    },
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [category, setCategory] = useState("all");
+  const [status, setStatus] = useState("all");
+  const [sortBy, setSortBy] = useState("newest");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+
+  const handleFilterChange = (setter: (v: string) => void, value: string) => {
+    setter(value);
+    setCurrentPage(1);
+  };
+  const { data } = useProducts();
+
+  const products = useMemo(() => data?.products ?? [], [data?.products]);
+  const filteredProducts = useMemo(() => {
+    let result = [...products];
+    if (category !== "all") {
+      result = result.filter((product) => product.category === category);
+    }
+
+    // Status Filter
+    if (status !== "all") {
+      result = result.filter(
+        (product) => product.availabilityStatus === status,
+      );
+    }
+
+    // Sort
+    switch (sortBy) {
+      case "price-low":
+        result.sort((a, b) => a.price - b.price);
+        break;
+
+      case "price-high":
+        result.sort((a, b) => b.price - a.price);
+        break;
+
+      case "rating":
+        result.sort((a, b) => b.rating - a.rating);
+        break;
+
+      default:
+        break;
+    }
+
+    return result;
+  }, [products, category, status, sortBy]);
+
+  const stats = useMemo(() => {
+    if (!data) {
+      return {
+        totalProducts: 0,
+        stockValue: 0,
+        reorderAlerts: 0,
+      };
+    }
+
+    return {
+      totalProducts: data.total,
+
+      stockValue: data.products.reduce(
+        (sum, product) => sum + product.price * product.stock,
+        0,
+      ),
+
+      reorderAlerts: data.products.filter((product) => product.stock < 10)
+        .length,
+    };
+  }, [data]);
+
+  const clearFilters = () => {
+    setCategory("all");
+    setStatus("all");
+    setSortBy("newest");
+  };
+
+  const categoriesOpts = [
+    { title: "All Categories", value: "all" },
+    { title: "Beauty", value: "beauty" },
+    { title: "Furniture", value: "furniture" },
+    { title: "Fragrances", value: "fragrances" },
+  ];
+  const statusesOpts = [
+    { title: "All Statuses", value: "all" },
+    { title: "In Stock", value: "In Stock" },
+    { title: "Low Stock", value: "Low Stock" },
+    { title: "Out of Stock", value: "Out of Stock" },
+  ];
+  const sortOpts = [
+    { title: "Newest First", value: "newest" },
+    { title: "Price: Low to High", value: "price-low" },
+    { title: "Price: High to Low", value: "price-high" },
+    { title: "Highest Rating", value: "rating" },
   ];
 
   const tableHeaders = [
@@ -107,13 +118,22 @@ const ProductsPage = () => {
     "ACTIONS",
   ];
 
+  const pageSize = 4;
+
+  const total = filteredProducts.length;
+
+  const totalPages = Math.ceil(total / pageSize);
+
+  const start = (currentPage - 1) * pageSize;
+  const end = start + pageSize;
+
+  const paginatedProducts = filteredProducts.slice(start, end);
+
   return (
     <div className="flex flex-col gap-10">
+      {isFormOpen && <AddProductForm onClose={() => setIsFormOpen(false)} />}
       <div className="flex items-end justify-between">
         <div className="flex flex-col items-start justify-start gap-1">
-          <p className="text-text-muted text-xs font-medium">
-            {"Inventory > Products"}
-          </p>
           <h1 className="text-text tracking-tight text-3xl font-semibold">
             Products
           </h1>
@@ -121,7 +141,10 @@ const ProductsPage = () => {
             Manage your global product catalog and stock levels.
           </p>
         </div>
-        <button className="bg-primary px-6 py-4 flex items-center gap-2 text-[#1000A9] rounded-lg">
+        <button
+          onClick={() => setIsFormOpen(true)}
+          className="bg-primary px-6 py-4 flex items-center gap-2 text-[#1000A9] rounded-lg"
+        >
           <IoAdd className="text-lg" />
           <p className="tracking-wide text-sm font-medium">Add Product</p>
         </button>
@@ -132,9 +155,19 @@ const ProductsPage = () => {
           <select
             name="categories"
             id="categories"
-            className="border border-border px-4 py-2 text-text rounded-lg"
+            value={category}
+            onChange={(e) => handleFilterChange(setCategory, e.target.value)}
+            className="border border-border px-4 py-2 text-text rounded-lg "
           >
-            <option value="All">All Categories</option>
+            {categoriesOpts.map((item) => (
+              <option
+                key={item.value}
+                className="text-surface"
+                value={item.value}
+              >
+                {item.title}
+              </option>
+            ))}
           </select>
         </div>
         <div className="flex items-center gap-4">
@@ -142,9 +175,19 @@ const ProductsPage = () => {
           <select
             name="status"
             id="status"
-            className="border border-border px-4 py-2 text-text rounded-lg"
+            value={status}
+            onChange={(e) => handleFilterChange(setStatus, e.target.value)}
+            className="border border-border px-4 py-2 text-text rounded-lg "
           >
-            <option value="status">All Statuses</option>
+            {statusesOpts.map((item) => (
+              <option
+                key={item.value}
+                className="text-surface"
+                value={item.value}
+              >
+                {item.title}
+              </option>
+            ))}
           </select>
         </div>
         <div className="flex items-center gap-4">
@@ -152,12 +195,27 @@ const ProductsPage = () => {
           <select
             name="sort"
             id="sort"
-            className="border border-border px-4 py-2 text-text rounded-lg"
+            value={sortBy}
+            onChange={(e) => handleFilterChange(setSortBy, e.target.value)}
+            className="border border-border px-4 py-2 text-text rounded-lg "
           >
-            <option value="news">Newest First</option>
+            {sortOpts.map((item) => (
+              <option
+                key={item.value}
+                className="text-surface"
+                value={item.value}
+              >
+                {item.title}
+              </option>
+            ))}
           </select>
         </div>
-        <button>Clear All Filters</button>
+        <button
+          className="text-sm hover:text-red-500 hover:underline cursor-pointer"
+          onClick={clearFilters}
+        >
+          Clear All Filters
+        </button>
       </div>
       <div className="border border-border rounded-xl overflow-hidden">
         <table className="w-full">
@@ -174,13 +232,13 @@ const ProductsPage = () => {
             </tr>
           </thead>
           <tbody>
-            {products.map((product) => (
+            {paginatedProducts.map((product) => (
               <tr
                 key={product.id}
                 className="border-b border-border hover:bg-white/5 transition-colors"
               >
                 <td className="px-6 py-4">
-                  <p className="font-medium">{product.product}</p>
+                  <p className="font-medium">{product.id}</p>
                 </td>
                 <td className="px-6 py-4">{product.sku}</td>
                 <td className="px-6 py-4">
@@ -188,65 +246,126 @@ const ProductsPage = () => {
                     {product.category}
                   </span>
                 </td>
-                <td className="px-6 py-4">{product.price}</td>
+                <td className="px-6 py-4">{product.price.toFixed(2)}$</td>
                 <td className="px-6 py-4">{product.stock}</td>
                 <td className="px-6 py-4">
                   <span
                     className={clsx(
                       "px-3 py-1 rounded-full text-xs font-medium",
-                      product.status === "Active" &&
+                      product.availabilityStatus === "In Stock" &&
                         "bg-green-500/10 text-green-400",
-                      product.status === "Low Stock" &&
+                      product.availabilityStatus === "Low Stock" &&
                         "bg-yellow-500/10 text-yellow-400",
-                      product.status === "Out of Stock" &&
+                      product.availabilityStatus === "Out of Stock" &&
                         "bg-red-500/10 text-red-400",
                     )}
                   >
-                    {product.status}
+                    {product.availabilityStatus}
                   </span>
                 </td>
-                <td className="px-6 py-4">Actions</td>
+                <td className="px-6 py-4 relative">
+                  <button
+                    onClick={() =>
+                      setOpenMenuId(
+                        openMenuId === product.id ? null : product.id,
+                      )
+                    }
+                    className="rounded-lg hover:bg-white/5"
+                  >
+                    <LuEllipsisVertical size={20} />
+                  </button>
+                  {openMenuId === product.id && (
+                    <div className="absolute right-6 top-10 w-32 bg-[#1f1f28] border border-border rounded-lg shadow-lg overflow-hidden z-10">
+                      <button
+                        onClick={() => {
+                          console.log("view", product.id);
+                          setOpenMenuId(null);
+                        }}
+                        className="w-full text-left px-4 py-1 text-sm hover:bg-white/5"
+                      >
+                        View
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          console.log("edit", product.id);
+                          setOpenMenuId(null);
+                        }}
+                        className="w-full text-left px-4 py-1 text-sm hover:bg-white/5"
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          console.log("delete", product.id);
+                          setOpenMenuId(null);
+                        }}
+                        className="w-full text-left px-4 py-1 text-sm text-red-400 hover:bg-red-500/10"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
         <div className="flex items-center justify-between px-6 py-4 bg-[#292932]/50">
           <p className="text-sm text-text-muted">
-            Showing 1 to 4 of 24 results
+            Showing {total === 0 ? 0 : start + 1} to {Math.min(end, total)} of
+            {total} results
           </p>
           <div className="flex items-center gap-2 ">
-            <button className="px-3 py-2 rounded-lg border border-border hover:bg-white/5">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => p - 1)}
+              className="px-3 py-2 rounded-lg border border-border hover:bg-white/5 disabled:opacity-50"
+            >
               Previous
             </button>
-            <button className="h-9 w-9 rounded-lg bg-primary text-bg font-medium">
-              1
-            </button>
-            <button className="h-9 w-9 rounded-lg border border-border hover:bg-white/5">
-              2
-            </button>
-            <button className="h-9 w-9 rounded-lg border border-border hover:bg-white/5">
-              3
-            </button>
-            <button className="px-3 py-2 rounded-lg border border-border hover:bg-white/5">
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentPage(i + 1)}
+                className={`h-9 w-9 rounded-lg border ${
+                  currentPage === i + 1
+                    ? "bg-primary text-bg"
+                    : "border-border hover:bg-white/5"
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage((p) => p + 1)}
+              className="px-3 py-2 rounded-lg border border-border hover:bg-white/5 disabled:opacity-50"
+            >
               Next
             </button>
           </div>
         </div>
       </div>
       <div className="grid grid-cols-3 gap-6">
-        <Card icon={LuClipboardCheck} title="TOTAL PRODUCTS" value="1,284" />
+        <Card
+          icon={LuClipboardCheck}
+          title="TOTAL PRODUCTS"
+          value={stats.totalProducts.toLocaleString()}
+        />
 
         <Card
           icon={LuBanknote}
           title="STOCK VALUE"
-          value="$142,502.00"
+          value={`$${stats.stockValue.toLocaleString()}`}
           iconClassName="text-secondary"
         />
 
         <Card
           icon={LuTriangleAlert}
           title="REORDER ALERTS"
-          value="18 Items"
+          value={`${stats.reorderAlerts} Items`}
           iconClassName="text-[#FFB783]"
         />
       </div>
