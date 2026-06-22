@@ -1,7 +1,12 @@
 import ReactECharts from "echarts-for-react";
 import * as echarts from "echarts";
 
-const NewCustomersChart = () => {
+type Props = {
+  data: number[];
+  labels: string[];
+};
+
+const NewCustomersChart = ({ data, labels }: Props) => {
   const option = {
     grid: {
       top: 10,
@@ -17,7 +22,7 @@ const NewCustomersChart = () => {
 
     xAxis: {
       type: "category",
-      data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      data: labels,
 
       axisLine: {
         show: false,
@@ -39,7 +44,7 @@ const NewCustomersChart = () => {
         smooth: true,
         symbol: "none",
 
-        data: [24, 31, 28, 42, 38, 51, 47],
+        data,
 
         lineStyle: {
           color: "#c0c1ff",

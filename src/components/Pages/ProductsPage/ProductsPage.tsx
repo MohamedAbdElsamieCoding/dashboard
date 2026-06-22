@@ -143,7 +143,7 @@ const ProductsPage = () => {
         </div>
         <button
           onClick={() => setIsFormOpen(true)}
-          className="bg-primary px-6 py-4 flex items-center gap-2 text-[#1000A9] rounded-lg"
+          className="bg-primary px-4 py-2 flex items-center gap-2 text-[#1000A9] rounded-lg"
         >
           <IoAdd className="text-lg" />
           <p className="tracking-wide text-sm font-medium">Add Product</p>
@@ -323,7 +323,7 @@ const ProductsPage = () => {
               onClick={() => setCurrentPage((p) => p - 1)}
               className="px-3 py-2 rounded-lg border border-border hover:bg-white/5 disabled:opacity-50"
             >
-              Previous
+              Prev
             </button>
             {Array.from({ length: totalPages }, (_, i) => (
               <button

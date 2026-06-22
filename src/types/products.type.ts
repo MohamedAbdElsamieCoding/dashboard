@@ -58,4 +58,5 @@ export type ProductsResponse = {
   total: number;
   skip: number;
   limit: number;
+  totalRevenue: number;
 };

@@ -177,10 +177,10 @@ const UsersPage = () => {
               key={item.title}
               onClick={() => setActiveTab(item.title)}
               className={clsx(
-                "px-4 py-2 rounded-md transition-colors",
+                "px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200",
                 activeTab === item.title
-                  ? "bg-primary text-[#1000A9]"
-                  : "bg-transparent text-text-muted hover:text-text",
+                  ? "bg-primary text-[#1000A9] shadow-sm"
+                  : "text-text-muted hover:text-text hover:bg-white/5",
               )}
             >
               {item.title}

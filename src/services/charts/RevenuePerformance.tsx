@@ -1,7 +1,20 @@
 import ReactECharts from "echarts-for-react";
 import * as echarts from "echarts";
+import { useProducts } from "../../hooks/useProducts";
 
 const RevenuePerformanceChart = () => {
+  const { data: productsData } = useProducts();
+  const products = productsData?.products ?? [];
+
+  const revenueByMonth = Array.from({ length: 6 }).map((_, index) => {
+    const chunk = products.slice(index * 3, index * 3 + 3);
+
+    return {
+      month: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"][index],
+      revenue: chunk.reduce((acc, p) => acc + p.price * p.stock, 0),
+    };
+  });
+
   const option = {
     tooltip: {
       trigger: "axis",
@@ -23,7 +36,7 @@ const RevenuePerformanceChart = () => {
     xAxis: {
       type: "category",
       boundaryGap: false,
-      data: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+      data: revenueByMonth.map((i) => i.month),
       axisLine: {
         show: false,
       },
@@ -48,7 +61,7 @@ const RevenuePerformanceChart = () => {
         smooth: true,
         symbol: "none",
 
-        data: [12000, 18000, 15000, 21000, 20000, 26000],
+        data: revenueByMonth.map((i) => i.revenue),
 
         lineStyle: {
           width: 2,

@@ -1,6 +1,25 @@
 import ReactECharts from "echarts-for-react";
+import { useProducts } from "../../hooks/useProducts";
 
 const SalesDistributionChart = () => {
+  const { data: productsData } = useProducts();
+
+  const products = productsData?.products ?? [];
+  const categoryMap: Record<string, number> = {};
+
+  products.forEach((product) => {
+    const category = product.category;
+
+    const value = product.price * product.stock;
+
+    categoryMap[category] = (categoryMap[category] || 0) + value;
+  });
+  const chartData = Object.entries(categoryMap).map(([name, value]) => ({
+    name,
+    value,
+  }));
+  const totalOrders = products.length;
+
   const option = {
     tooltip: {
       trigger: "item",
@@ -22,7 +41,7 @@ const SalesDistributionChart = () => {
         left: "center",
         top: "38%",
         style: {
-          text: "1,240",
+          text: totalOrders.toString(),
           fill: "#ffffff",
           fontSize: 30,
           fontWeight: 700,
@@ -64,12 +83,7 @@ const SalesDistributionChart = () => {
           show: false,
         },
 
-        data: [
-          { value: 4500, name: "Electronics" },
-          { value: 3200, name: "Fashion" },
-          { value: 2100, name: "Home" },
-          { value: 1800, name: "Sports" },
-        ],
+        data: chartData,
       },
     ],
   };

@@ -1,15 +1,52 @@
 import { clsx } from "clsx";
 import { useState } from "react";
 import { IoIosTrendingUp } from "react-icons/io";
-import { IoEllipsisVerticalSharp, IoFilterOutline } from "react-icons/io5";
+import { IoEllipsisVerticalSharp } from "react-icons/io5";
 import { MdOutlineFileDownload } from "react-icons/md";
 import RevenuePerformanceChart from "../../../services/charts/RevenuePerformance";
 import SalesDistributionChart from "../../../services/charts/CategorySplit";
 import NewCustomersChart from "../../../services/charts/NewCustomers";
-import { customers } from "../../../services/orders/recentOrders";
+import { useProducts } from "../../../hooks/useProducts";
+import { useUsers } from "../../../hooks/useUsers";
 
 const AnalyticsPage = () => {
+  const { data: productsData } = useProducts();
+  const products = productsData?.products ?? [];
+  const { data: usersData } = useUsers();
   const [activeTab, setActiveTab] = useState("Last 30 Days");
+  const [statusFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const handleDownloadCSV = () => {
+    const headers = [
+      "Customer",
+      "Source",
+      "Lifetime Value",
+      "Status",
+      "Activity",
+    ];
+
+    const rows = filteredCustomers.map((c) => [
+      c.customer,
+      c.source,
+      c.lifetimeValue,
+      c.status,
+      c.activity,
+    ]);
+
+    const csvContent = [headers, ...rows].map((e) => e.join(",")).join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "customers.csv";
+    a.click();
+
+    URL.revokeObjectURL(url);
+  };
+  const itemsPerPage = 5;
 
   const timeRange = [
     { title: "Last 30 Days" },
@@ -24,7 +61,44 @@ const AnalyticsPage = () => {
     { title: "STATUS" },
     { title: "ACTIVITY" },
   ];
+  const totalRevenue = productsData?.totalRevenue ?? 0;
+  const customers =
+    usersData?.users.map((user) => ({
+      id: user.id,
+      customer: `${user.firstName} ${user.lastName}`,
+      source: "Organic",
+      lifetimeValue: user.age * 120,
+      status: user.gender,
+      activity: user.email,
+    })) ?? [];
 
+  const users = usersData?.users ?? [];
+
+  const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+  const data = labels.map((_, index) => {
+    return users.filter((_, i) => i % 7 === index).length;
+  });
+
+  const topProducts = [...products]
+    .map((p) => ({
+      ...p,
+      revenue: p.price * p.stock,
+      sales: p.stock,
+    }))
+    .sort((a, b) => b.revenue - a.revenue)
+    .slice(0, 4);
+
+  const totalPages = Math.ceil(customers.length / itemsPerPage);
+
+  const paginatedCustomers = customers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
+  );
+  const filteredCustomers = customers.filter((c) => {
+    if (statusFilter === "all") return true;
+    return c.status === statusFilter;
+  });
   return (
     <div className="flex flex-col gap-10">
       <div className="flex items-center justify-between">
@@ -42,10 +116,10 @@ const AnalyticsPage = () => {
               key={item.title}
               onClick={() => setActiveTab(item.title)}
               className={clsx(
-                "px-4 py-2 rounded-md transition-colors",
+                "px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200",
                 activeTab === item.title
-                  ? "bg-primary text-[#1000A9]"
-                  : "bg-transparent text-text-muted hover:text-text",
+                  ? "bg-primary text-[#1000A9] shadow-sm"
+                  : "text-text-muted hover:text-text hover:bg-white/5",
               )}
             >
               {item.title}
@@ -62,7 +136,10 @@ const AnalyticsPage = () => {
               </h2>
               <div className="flex items-center gap-2">
                 <p className="text-primary font-bold tracking-tight text-5xl">
-                  $128,430.50
+                  $
+                  {totalRevenue.toLocaleString("en-US", {
+                    maximumFractionDigits: 2,
+                  })}
                 </p>
                 <div className="rounded-full bg-secondary/10 flex items-center text-secondary px-3 py-0.5">
                   <IoIosTrendingUp />
@@ -85,49 +162,42 @@ const AnalyticsPage = () => {
             <h2 className="text-lg font-medium text-text">New Customers</h2>
             <p className="text-xs text-secondary tracking-wide">+2.4k</p>
           </div>
-          <NewCustomersChart />
+          <NewCustomersChart data={data} labels={labels} />
         </div>
         <div className="col-span-2 flex flex-col gap-6">
           <h2 className="text-lg font-medium text-text">Product Performance</h2>
+
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-surface p-4 flex items-center gap-4 border border-border rounded-xl w-full">
-              <img
-                src="/product.png"
-                alt="product"
-                className="w-16 h-16 rounded-lg"
-              />
-              <div className="flex flex-col items-start">
-                <h3 className="text-base font-bold text-text">
-                  Titanium Watch S3
-                </h3>
-                <p className="text-text-muted tracking-wide font-medium text-xs">
-                  Top Seller this month
-                </p>
+            {topProducts.map((product) => (
+              <div
+                key={product.id}
+                className="bg-surface p-4 flex items-center gap-4 border border-border rounded-xl w-full"
+              >
+                <img
+                  src={product.thumbnail}
+                  alt={product.title}
+                  className="w-16 h-16 rounded-lg object-cover"
+                />
+
+                <div className="flex flex-col items-start">
+                  <h3 className="text-base font-bold text-text">
+                    {product.title}
+                  </h3>
+                  <p className="text-text-muted tracking-wide font-medium text-xs">
+                    Top Seller this month
+                  </p>
+                </div>
+
+                <div className="flex flex-col gap-1 items-center">
+                  <p className="text-base text-secondary font-bold">
+                    ${product.revenue.toLocaleString()}
+                  </p>
+                  <p className="tracking-wide text-xs font-medium">
+                    {product.sales} sales
+                  </p>
+                </div>
               </div>
-              <div className="flex flex-col gap-1 items-center">
-                <p className="text-base text-secondary font-bold">$24,900</p>
-                <p className="tracking-wide text-xs font-medium">842 sales</p>
-              </div>
-            </div>
-            <div className="bg-surface p-4 flex items-center gap-4 border border-border rounded-xl w-full">
-              <img
-                src="/product.png"
-                alt="product"
-                className="w-16 h-16 rounded-lg"
-              />
-              <div className="flex flex-col items-start">
-                <h3 className="text-base font-bold text-text">
-                  Titanium Watch S3
-                </h3>
-                <p className="text-text-muted tracking-wide font-medium text-xs">
-                  Top Seller this month
-                </p>
-              </div>
-              <div className="flex flex-col gap-1 items-center">
-                <p className="text-base text-secondary font-bold">$24,900</p>
-                <p className="tracking-wide text-xs font-medium">842 sales</p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
         <div className="col-span-3 flex flex-col gap-6 border border-border rounded-xl p-6 bg-surface/30">
@@ -136,8 +206,12 @@ const AnalyticsPage = () => {
               Recent Customer Growth Activity
             </h2>
             <div className="flex items-center gap-2">
-              <IoFilterOutline />
-              <MdOutlineFileDownload />
+              <button
+                onClick={handleDownloadCSV}
+                className="p-2 rounded-md border border-border bg-surface hover:bg-surface/70 transition"
+              >
+                <MdOutlineFileDownload />
+              </button>
             </div>
           </div>
           <table className="w-full text-left border-collapse">
@@ -156,7 +230,7 @@ const AnalyticsPage = () => {
               </tr>
             </thead>
             <tbody>
-              {customers.map((customer) => (
+              {paginatedCustomers.map((customer) => (
                 <tr key={customer.id} className="border-b border-border">
                   <td className="px-6 py-4">{customer.customer}</td>
                   <td className="px-6 py-4">{customer.source}</td>
@@ -167,6 +241,45 @@ const AnalyticsPage = () => {
               ))}
             </tbody>
           </table>
+          <div className="flex items-center justify-between mt-4 text-sm text-text-muted">
+            <p>
+              Page {currentPage} of {totalPages}
+            </p>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-2 rounded-lg border border-border hover:bg-white/5 disabled:opacity-50"
+              >
+                Prev
+              </button>
+
+              {Array.from({ length: totalPages }).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`h-9 w-9 rounded-lg border ${
+                    currentPage === i + 1
+                      ? "bg-primary text-bg"
+                      : "border-border hover:bg-white/5"
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+
+              <button
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(p + 1, totalPages))
+                }
+                disabled={currentPage === totalPages}
+                className="px-3 py-2 rounded-lg border border-border hover:bg-white/5 disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
