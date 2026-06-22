@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAddProduct } from "../../../services/products/useAddProduct";
+import { useAddProduct } from "../../../hooks/useAddProduct";
 import { IoClose } from "react-icons/io5";
 
 interface AddProductFormProps {
