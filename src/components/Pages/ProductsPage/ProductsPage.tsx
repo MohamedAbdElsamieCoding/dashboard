@@ -8,6 +8,7 @@ import {
   LuEllipsisVertical,
 } from "react-icons/lu";
 import { useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import AddProductForm from "./AddProductForm";
 import { useProducts } from "../../../hooks/useProducts";
 
@@ -16,7 +17,9 @@ const ProductsPage = () => {
   const [category, setCategory] = useState("all");
   const [status, setStatus] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
-
+  const [searchParams] = useSearchParams();
+  const search = searchParams.get("search") || "";
+  
   const [currentPage, setCurrentPage] = useState(1);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
@@ -24,7 +27,7 @@ const ProductsPage = () => {
     setter(value);
     setCurrentPage(1);
   };
-  const { data } = useProducts();
+  const { data } = useProducts(search);
 
   const products = useMemo(() => data?.products ?? [], [data?.products]);
   const filteredProducts = useMemo(() => {
@@ -110,6 +113,7 @@ const ProductsPage = () => {
 
   const tableHeaders = [
     "PRODUCT",
+    "TITLE",
     "SKU",
     "CATEGORY",
     "PRICE",
@@ -239,6 +243,9 @@ const ProductsPage = () => {
               >
                 <td className="px-6 py-4">
                   <p className="font-medium">{product.id}</p>
+                </td>
+                <td className="px-6 py-4">
+                  {product.title.split(" ").slice(0, 2).join(" ")}
                 </td>
                 <td className="px-6 py-4">{product.sku}</td>
                 <td className="px-6 py-4">

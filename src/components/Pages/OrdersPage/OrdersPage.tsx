@@ -10,6 +10,7 @@ import { IoIosArrowForward, IoIosArrowBack } from "react-icons/io";
 import { useCarts } from "../../../hooks/useCarts";
 import { LuEllipsisVertical } from "react-icons/lu";
 import CreateOrderForm from "./CreateOrderForm";
+import type { Cart } from "../../../types/carts.type";
 
 const UsersPage = () => {
   type AmountFilter = "all" | "under100" | "100to500" | "over500";
@@ -97,7 +98,7 @@ const UsersPage = () => {
 
   const tableHeaders = [
     "ORDER #",
-    "CUSTOMER",
+    "CUSTOMER ID",
     "DATE",
     "AMOUNT",
     "STATUS",
@@ -111,6 +112,32 @@ const UsersPage = () => {
     "This Month",
     "This Year",
   ];
+  const exportOrdersToCSV = (orders: Cart[]) => {
+    const headers = ["Order ID", "Customer", "Date", "Amount", "Status"];
+
+    const rows = orders.map((order) => [order.id, order.userId, order.total]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) => row.join(",")),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `orders-${Date.now()}.csv`;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="flex flex-col gap-10">
@@ -247,7 +274,12 @@ const UsersPage = () => {
               </div>
             )}
           </div>
-          <FiDownload />
+          <button
+            onClick={() => exportOrdersToCSV(orders)}
+            className="flex items-center gap-2"
+          >
+            <FiDownload />
+          </button>
         </div>
       </div>
       <div className="border border-border rounded-xl overflow-hidden">

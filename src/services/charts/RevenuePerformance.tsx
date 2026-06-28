@@ -1,19 +1,13 @@
 import ReactECharts from "echarts-for-react";
 import * as echarts from "echarts";
-import { useProducts } from "../../hooks/useProducts";
 
-const RevenuePerformanceChart = () => {
-  const { data: productsData } = useProducts();
-  const products = productsData?.products ?? [];
+type RevenuePerformanceChartProps = {
+  labels: string[];
+  data: number[];
+};
 
-  const revenueByMonth = Array.from({ length: 6 }).map((_, index) => {
-    const chunk = products.slice(index * 3, index * 3 + 3);
-
-    return {
-      month: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"][index],
-      revenue: chunk.reduce((acc, p) => acc + p.price * p.stock, 0),
-    };
-  });
+const RevenuePerformanceChart = ({ labels, data }: RevenuePerformanceChartProps) => {
+  const previousRevenue = data.map((value) => Math.round(value * 0.8));
 
   const option = {
     tooltip: {
@@ -36,7 +30,7 @@ const RevenuePerformanceChart = () => {
     xAxis: {
       type: "category",
       boundaryGap: false,
-      data: revenueByMonth.map((i) => i.month),
+      data: labels,
       axisLine: {
         show: false,
       },
@@ -60,29 +54,22 @@ const RevenuePerformanceChart = () => {
         type: "line",
         smooth: true,
         symbol: "none",
-
-        data: revenueByMonth.map((i) => i.revenue),
-
+        data: previousRevenue,
         lineStyle: {
           width: 2,
           opacity: 0.35,
         },
       },
-
       {
         name: "Current Revenue",
         type: "line",
         smooth: true,
-
-        data: [15000, 22000, 18000, 28000, 25000, 35000],
-
+        data,
         symbol: "circle",
         symbolSize: 8,
-
         lineStyle: {
           width: 4,
         },
-
         areaStyle: {
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
             {

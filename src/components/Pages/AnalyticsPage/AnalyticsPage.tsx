@@ -8,14 +8,63 @@ import SalesDistributionChart from "../../../services/charts/CategorySplit";
 import NewCustomersChart from "../../../services/charts/NewCustomers";
 import { useProducts } from "../../../hooks/useProducts";
 import { useUsers } from "../../../hooks/useUsers";
+import type { Product } from "../../../types/products.type";
+
+type TimeRangeOption = "Last 30 Days" | "Last 90 Days" | "Custom Range";
 
 const AnalyticsPage = () => {
   const { data: productsData } = useProducts();
   const products = productsData?.products ?? [];
   const { data: usersData } = useUsers();
-  const [activeTab, setActiveTab] = useState("Last 30 Days");
+  const users = usersData?.users ?? [];
+  const [activeTab, setActiveTab] = useState<TimeRangeOption>("Last 30 Days");
   const [statusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
+
+  const chartLabelsByRange: Record<TimeRangeOption, string[]> = {
+    "Last 30 Days": ["Week 1", "Week 2", "Week 3", "Week 4"],
+    "Last 90 Days": [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+    ],
+    "Custom Range": ["Period 1", "Period 2", "Period 3", "Period 4"],
+  };
+
+  const chartLabels = chartLabelsByRange[activeTab];
+
+  const productsForRange: Product[] =
+    activeTab === "Last 30 Days"
+      ? products.slice(0, 8)
+      : activeTab === "Last 90 Days"
+        ? products.slice(0, 12)
+        : products.slice(0, 6);
+
+  const revenueData = chartLabels.map((_, index) => {
+    const groupSize =
+      Math.ceil(productsForRange.length / chartLabels.length) || 1;
+    return productsForRange
+      .slice(index * groupSize, (index + 1) * groupSize)
+      .reduce((sum, product) => sum + product.price * product.stock, 0);
+  });
+
+  const newCustomersData = chartLabels.map((_, index) => {
+    const groupSize = Math.ceil(users.length / chartLabels.length) || 1;
+    return users.slice(index * groupSize, (index + 1) * groupSize).length * 8;
+  });
+
+  const categoryProducts: Product[] =
+    activeTab === "Last 30 Days"
+      ? products.slice(0, 8)
+      : activeTab === "Last 90 Days"
+        ? products
+        : products.slice(0, 6);
 
   const handleDownloadCSV = () => {
     const headers = [
@@ -46,9 +95,10 @@ const AnalyticsPage = () => {
 
     URL.revokeObjectURL(url);
   };
+
   const itemsPerPage = 5;
 
-  const timeRange = [
+  const timeRange: { title: TimeRangeOption }[] = [
     { title: "Last 30 Days" },
     { title: "Last 90 Days" },
     { title: "Custom Range" },
@@ -63,7 +113,7 @@ const AnalyticsPage = () => {
   ];
   const totalRevenue = productsData?.totalRevenue ?? 0;
   const customers =
-    usersData?.users.map((user) => ({
+    users.map((user) => ({
       id: user.id,
       customer: `${user.firstName} ${user.lastName}`,
       source: "Organic",
@@ -72,15 +122,10 @@ const AnalyticsPage = () => {
       activity: user.email,
     })) ?? [];
 
-  const users = usersData?.users ?? [];
+  const labels = chartLabels;
+  const data = newCustomersData;
 
-  const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
-  const data = labels.map((_, index) => {
-    return users.filter((_, i) => i % 7 === index).length;
-  });
-
-  const topProducts = [...products]
+  const topProducts = [...categoryProducts]
     .map((p) => ({
       ...p,
       revenue: p.price * p.stock,
@@ -148,14 +193,14 @@ const AnalyticsPage = () => {
               </div>
             </div>
           </div>
-          <RevenuePerformanceChart />
+          <RevenuePerformanceChart labels={labels} data={revenueData} />
         </div>
         <div className="col-span-1 p-6 flex flex-col gap-6 border border-border rounded-xl bg-bg/60">
           <div className="flex items-start justify-between">
             <h2 className="text-lg font-medium">Category Split</h2>
             <IoEllipsisVerticalSharp />
           </div>
-          <SalesDistributionChart />
+          <SalesDistributionChart products={categoryProducts} />
         </div>
         <div className="col-span-1 flex flex-col gap-2 p-6">
           <div className="flex items-center justify-between">

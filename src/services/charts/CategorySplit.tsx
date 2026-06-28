@@ -1,19 +1,19 @@
 import ReactECharts from "echarts-for-react";
-import { useProducts } from "../../hooks/useProducts";
+import type { Product } from "../../types/products.type";
 
-const SalesDistributionChart = () => {
-  const { data: productsData } = useProducts();
+type SalesDistributionChartProps = {
+  products: Product[];
+};
 
-  const products = productsData?.products ?? [];
+const SalesDistributionChart = ({ products }: SalesDistributionChartProps) => {
   const categoryMap: Record<string, number> = {};
 
   products.forEach((product) => {
     const category = product.category;
-
     const value = product.price * product.stock;
-
     categoryMap[category] = (categoryMap[category] || 0) + value;
   });
+
   const chartData = Object.entries(categoryMap).map(([name, value]) => ({
     name,
     value,

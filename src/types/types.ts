@@ -1,3 +1,5 @@
+import type { Product } from "./products.type";
+
 export type OrderStatus = "Completed" | "Pending" | "Cancelled";
 
 export interface RevenueData {
@@ -26,3 +28,15 @@ export type Customer = {
   status: "Active" | "Inactive" | "VIP";
   activity: string;
 };
+
+export interface DashboardOrder {
+  id: number;
+  products: Product[];
+  total: number;
+  discountedTotal: number;
+  userId: number;
+  totalProducts: number;
+  totalQuantity: number;
+  createdAt: string;
+  status: string;
+}

@@ -17,7 +17,7 @@ const Sidebar = () => {
 
   return (
     <aside className="fixed left-0 top-0 h-screen w-64 border-r border-border pt-6 px-6 bg-surface flex flex-col">
-      <div className="mb-10 flex flex-col gap-2">
+      <div className="mb-10 flex flex-col gap-2 cursor-default">
         <h2 className="text-2xl font-bold tracking-tight text-primary">
           Vertex
         </h2>
@@ -50,7 +50,7 @@ const Sidebar = () => {
           );
         })}
       </nav>
-      <div className="-mx-6 mt-auto">
+      <div className="-mx-6 mt-auto cursor-default select-none">
         <div className="w-full h-0.5 bg-border" />
         <div className="py-6 px-6 flex gap-4 items-center">
           <div className="rounded-full h-10 w-10 bg-primary flex items-center justify-center">
