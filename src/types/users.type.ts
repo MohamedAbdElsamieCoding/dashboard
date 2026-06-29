@@ -9,6 +9,10 @@ export type User = {
 
   email: string;
   phone: string;
+  company?: {
+    name: string;
+    title: string;
+  };
 
   username: string;
   password: string;

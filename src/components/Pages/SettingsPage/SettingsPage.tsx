@@ -1,7 +1,35 @@
+import { useState } from "react";
 import { GoPencil } from "react-icons/go";
 import { LuCloudUpload, LuCircleAlert, LuMap } from "react-icons/lu";
+import { useUsers } from "../../../hooks/useUsers";
 
 const SettingsPage = () => {
+  const { data: userData } = useUsers();
+  const user = userData?.users?.[0];
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [editingField, setEditingField] = useState<string | null>(null);
+
+  const getFieldValue = (field: string, fallback: string) => {
+    if (editingField === field) {
+      return drafts[field] ?? fallback;
+    }
+
+    return fallback;
+  };
+
+  const toggleEdit = (field: string) => {
+    if (editingField === field) {
+      setEditingField(null);
+      return;
+    }
+
+    setEditingField(field);
+  };
+
+  const updateDraft = (field: string, value: string) => {
+    setDrafts((current) => ({ ...current, [field]: value }));
+  };
+
   return (
     <div className="flex flex-col gap-10">
       <div className="flex flex-col items-start justify-start gap-1">
@@ -23,61 +51,138 @@ const SettingsPage = () => {
               <label className="text-text-muted text-xs font-medium">
                 Full Name
               </label>
-              <input
-                type="text"
-                className="bg-bg px-4 py-2 rounded-lg w-full outline-none"
-                placeholder="Enter your name..."
-              />
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={getFieldValue(
+                    "fullName",
+                    user ? `${user.firstName} ${user.lastName}` : "",
+                  )}
+                  readOnly={editingField !== "fullName"}
+                  onChange={(e) => updateDraft("fullName", e.target.value)}
+                  className="bg-bg px-4 py-2 rounded-lg w-full outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => toggleEdit("fullName")}
+                  className="text-primary text-sm font-medium"
+                >
+                  {editingField === "fullName" ? "Save" : "Edit"}
+                </button>
+              </div>
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-text-muted text-xs font-medium">
                 Email Address
               </label>
-              <input
-                type="email"
-                className="bg-bg px-4 py-2 rounded-lg w-full outline-none"
-                placeholder="alex.rivera@omnidash.io"
-              />
+              <div className="flex items-center gap-2">
+                <input
+                  type="email"
+                  value={getFieldValue("email", user?.email ?? "")}
+                  readOnly={editingField !== "email"}
+                  onChange={(e) => updateDraft("email", e.target.value)}
+                  className="bg-bg px-4 py-2 rounded-lg w-full outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => toggleEdit("email")}
+                  className="text-primary text-sm font-medium"
+                >
+                  {editingField === "email" ? "Save" : "Edit"}
+                </button>
+              </div>
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-text-muted text-xs font-medium">
                 Job Title
               </label>
-              <input
-                type="text"
-                className="bg-bg px-4 py-2 rounded-lg w-full outline-none"
-                placeholder="System Admin"
-              />
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={getFieldValue(
+                    "jobTitle",
+                    user?.company?.title ?? "System Admin",
+                  )}
+                  readOnly={editingField !== "jobTitle"}
+                  onChange={(e) => updateDraft("jobTitle", e.target.value)}
+                  className="bg-bg px-4 py-2 rounded-lg w-full outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => toggleEdit("jobTitle")}
+                  className="text-primary text-sm font-medium"
+                >
+                  {editingField === "jobTitle" ? "Save" : "Edit"}
+                </button>
+              </div>
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-text-muted text-xs font-medium">
                 Organization
               </label>
-              <input
-                type="text"
-                className="bg-bg px-4 py-2 rounded-lg w-full outline-none"
-                placeholder="Vertex Global Ops"
-              />
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={getFieldValue(
+                    "organization",
+                    user?.company?.name ?? "Vertex Global Ops",
+                  )}
+                  readOnly={editingField !== "organization"}
+                  onChange={(e) => updateDraft("organization", e.target.value)}
+                  className="bg-bg px-4 py-2 rounded-lg w-full outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => toggleEdit("organization")}
+                  className="text-primary text-sm font-medium"
+                >
+                  {editingField === "organization" ? "Save" : "Edit"}
+                </button>
+              </div>
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-text-muted text-xs font-medium">
                 Current Password
               </label>
-              <input
-                type="password"
-                className="bg-bg px-4 py-2 rounded-lg w-full outline-none"
-                placeholder="*****************"
-              />
+              <div className="flex items-center gap-2">
+                <input
+                  type="password"
+                  value={getFieldValue("currentPassword", "")}
+                  readOnly={editingField !== "currentPassword"}
+                  onChange={(e) =>
+                    updateDraft("currentPassword", e.target.value)
+                  }
+                  className="bg-bg px-4 py-2 rounded-lg w-full outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => toggleEdit("currentPassword")}
+                  className="text-primary text-sm font-medium"
+                >
+                  {editingField === "currentPassword" ? "Save" : "Edit"}
+                </button>
+              </div>
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-text-muted text-xs font-medium">
                 New Password
               </label>
-              <input
-                type="password"
-                className="bg-bg px-4 py-2 rounded-lg w-full outline-none"
-                placeholder="*****************"
-              />
+              <div className="flex items-center gap-2">
+                <input
+                  type="password"
+                  value={getFieldValue("newPassword", "")}
+                  readOnly={editingField !== "newPassword"}
+                  onChange={(e) => updateDraft("newPassword", e.target.value)}
+                  className="bg-bg px-4 py-2 rounded-lg w-full outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => toggleEdit("newPassword")}
+                  className="text-primary text-sm font-medium"
+                >
+                  {editingField === "newPassword" ? "Save" : "Edit"}
+                </button>
+              </div>
             </div>
           </form>
           <div className="relative p-4 flex flex-col gap-2 items-center justify-center bg-bg rounded-lg cursor-pointer">

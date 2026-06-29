@@ -6,8 +6,12 @@ import {
   RiBarChart2Line,
 } from "react-icons/ri";
 import { clsx } from "clsx";
+import { useUsers } from "../hooks/useUsers";
 
 const Sidebar = () => {
+  const { data: userData } = useUsers();
+  const user = userData?.users?.[0];
+
   const navLinks = [
     { title: "Dashboard", link: "/", icon: RiDashboardHorizontalLine },
     { title: "Products", link: "/products", icon: RiBox3Line },
@@ -54,12 +58,14 @@ const Sidebar = () => {
         <div className="w-full h-0.5 bg-border" />
         <div className="py-6 px-6 flex gap-4 items-center">
           <div className="rounded-full h-10 w-10 bg-primary flex items-center justify-center">
-            <p className="text-base font-bold text-[#0D0096]">JD</p>
+            <p className="text-base font-bold text-[#0D0096]">
+              {`${user?.firstName.slice(0, 1)}${user?.lastName.slice(0, 1)}`}
+            </p>
           </div>
           <div className="flex flex-col gap-1">
-            <h3 className="text-xs font-bold tracking-wider">John Doe</h3>
+            <h3 className="text-xs font-bold tracking-wider">{`${user?.firstName} ${user?.lastName}`}</h3>
             <p className="uppercase font-normal text-[10px] tracking-wide">
-              SUPER ADMIN
+              {user?.company?.name.split(" ")}
             </p>
           </div>
         </div>

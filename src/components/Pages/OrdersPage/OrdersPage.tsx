@@ -1,10 +1,6 @@
 import { clsx } from "clsx";
 import { useMemo, useState } from "react";
-import {
-  IoCalendarClearOutline,
-  IoAdd,
-  IoFilterOutline,
-} from "react-icons/io5";
+import { IoAdd, IoFilterOutline } from "react-icons/io5";
 import { FiDownload } from "react-icons/fi";
 import { IoIosArrowForward, IoIosArrowBack } from "react-icons/io";
 import { useCarts } from "../../../hooks/useCarts";
@@ -16,8 +12,7 @@ const UsersPage = () => {
   type AmountFilter = "all" | "under100" | "100to500" | "over500";
 
   const [activeTab, setActiveTab] = useState("All Orders");
-  const [dateRange, setDateRange] = useState("Last 30 Days");
-  const [isOpen, setIsOpen] = useState(false);
+
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [amountFilter, setAmountFilter] = useState<AmountFilter>("all");
@@ -105,13 +100,6 @@ const UsersPage = () => {
     "ACTIONS",
   ];
 
-  const ranges = [
-    "Today",
-    "Last 7 Days",
-    "Last 30 Days",
-    "This Month",
-    "This Year",
-  ];
   const exportOrdersToCSV = (orders: Cart[]) => {
     const headers = ["Order ID", "Customer", "Date", "Amount", "Status"];
 
@@ -163,31 +151,6 @@ const UsersPage = () => {
           </p>
         </div>
         <div className="flex items-center gap-4">
-          <div className="relative">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="px-4 py-2 flex items-center justify-center gap-2 bg-[#292932] border border-border rounded-lg text-text"
-            >
-              <IoCalendarClearOutline className="text-sm" />
-              <p className="tracking-wide text-xs font-medium">{dateRange}</p>
-            </button>
-            {isOpen && (
-              <div className="absolute top-full mt-2 right-0 w-48 bg-bg/90 border border-border rounded-lg shadow-lg overflow-hidden z-50">
-                {ranges.map((range) => (
-                  <button
-                    key={range}
-                    onClick={() => {
-                      setDateRange(range);
-                      setIsOpen(false);
-                    }}
-                    className="w-full px-4 py-3 text-left text-sm hover:bg-primary/50 hover:text-surface transition"
-                  >
-                    {range}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
           <button
             onClick={() => setIsCreateOrderOpen(true)}
             className="px-4 py-2 flex items-center justify-center gap-2 bg-primary border border-border rounded-lg text-[#1000A9]"
