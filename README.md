@@ -16,6 +16,17 @@ A modern React + TypeScript admin dashboard built with Vite and React Router.
 - `npm run build` — create a production build
 - `npm run preview` — preview the production build locally
 
+## Demo login
+
+Use the following credentials to try the app:
+
+```json
+{
+  "username": "emilys",
+  "password": "emilyspass"
+}
+```
+
 ## Vercel deployment
 
 This project includes a Vercel configuration file so client-side routes such as `/products`, `/orders`, and `/analytics` work correctly after deployment.
